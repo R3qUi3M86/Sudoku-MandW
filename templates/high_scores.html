@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title%}Login page{% endblock %}
+{% block content %}
+    <div class="menu-container">
+        <div class="logo-flex-container">
+            <div id="logo-container"></div>
+        </div>
+        <div class="menu">
+            <h1 class="action_title">HIGH SCORES</h1><br>
+            <div>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th>USERNAME</th>
+                        <th>DIFFICULTY</th>
+                        <th>BOARD SEED</th>
+                        <th>MISTAKES</th>
+                        <th>TIME</th>
+                    </tr>
+                {% for score in high_scores %}
+                    <tr>
+                        <td style="min-width: 15px; width: 15px">{{ loop.index }}. </td>
+                        <td>{{ score['username'] }}</td>
+                        <td>{{ score['difficulty'] }}</td>
+                        <td>{{ score['board_seed_id'] }}</td>
+                        <td>{{ score['mistakes'] }}</td>
+                        <td>{{ score['elapsed_time'] }}</td>
+                    </tr>
+
+                {% endfor %}
+                </table>
+                <div style="padding-top: 1rem">
+                    <a href="{{ url_for('main_menu') }}">
+                        <button type="button" class="menu-button">BACK TO MENU</button>
+                    </a><br><br><br><br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
