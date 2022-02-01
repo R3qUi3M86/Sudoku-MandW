@@ -9,7 +9,7 @@
 
         {% if not logged_in %}
             <a href="{{ url_for('login') }}" style="padding: 1rem">
-                <button type="button" class="menu-button">LOGIN</button>
+                <button type="button" class="menu-button">LOG IN</button>
             </a>
             <a href="{{ url_for('register') }}" style="padding: 1rem">
                 <button type="button" class="menu-button">REGISTER</button>
@@ -22,7 +22,7 @@
                 <button type="button" class="menu-button">LOAD GAME</button>
             </a>
             <a href="{{ url_for('logout') }}" style="padding: 1rem">
-                <button type="button" class="menu-button">LOGOUT</button>
+                <button type="button" class="menu-button">LOG OUT</button>
             </a>
         {% endif %}
             <a href="{{ url_for('high_score') }}" style="padding: 1rem">

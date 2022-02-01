@@ -10,7 +10,7 @@ board_to_solve = [[0, 8, 0, 0, 0, 0, 7, 3, 6], [0, 0, 6, 0, 0, 0, 4, 0, 0], [3, 
 # board_to_solve = [[6, 0, 2, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 7, 3, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 8, 0, 0, 9, 0, 2], [7, 1, 0, 0, 0, 5, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 8], [0, 0, 5, 9, 0, 0, 0, 0, 0], [0, 3, 0, 0, 0, 0, 0, 7, 0], [0, 0, 0, 0, 4, 0, 6, 0, 0]]
 m_tries = 300
 amt = 5
-diff = 60
+diff = 55
 
 
 def generate_boards(difficulty=45, amount=3, max_tries=60, mode=puzzle_generator_v3.PROGRESSIVE):
@@ -63,7 +63,6 @@ def solve_board(board):
 def shuffle_board(board, solved_board):
     board = util.get_board_as_array(board)
     solved_board = util.get_board_as_array(solved_board)
-    # print(np.matrix(solved_board))
     shuffled_board = puzzle_generator_v3.get_shuffled(board, solved_board)
 
     n = random.choice(range(4))
@@ -78,4 +77,4 @@ def shuffle_board(board, solved_board):
 
 
 #solve_board(board_to_solve)
-# generate_boards(diff, amt, m_tries, puzzle_generator_v3.PROGRESSIVE)
+#generate_boards(diff, amt, m_tries, puzzle_generator_v3.PROGRESSIVE)

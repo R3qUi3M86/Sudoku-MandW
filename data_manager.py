@@ -124,17 +124,63 @@ def get_all_scores(cursor: RealDictCursor) -> RealDictRow:
             FROM scores
             INNER JOIN users
             ON scores.user_id=users.id
-            ORDER BY elapsed_time ) AS foo
-            ORDER BY foo.difficulty DESC 
+            ORDER BY elapsed_time ) AS table_sorted_by_elapsed_time
+            ORDER BY table_sorted_by_elapsed_time.difficulty DESC, table_sorted_by_elapsed_time.elapsed_time
             """
     cursor.execute(query)
     return cursor.fetchall()
 
 
 @database_common.connection_handler
+def search_high_score_data_by_username(cursor: RealDictCursor, username: str):
+    query = """
+            SELECT * FROM (
+            SELECT board_seed_id, elapsed_time, mistakes, users.username, difficulty
+            FROM scores
+            INNER JOIN users
+            ON scores.user_id=users.id
+            WHERE users.username=%(username)s
+            ORDER BY elapsed_time ASC ) AS table_sorted_by_elapsed_time
+            ORDER BY table_sorted_by_elapsed_time.difficulty DESC
+            """
+    cursor.execute(query, {'username': username})
+    return cursor.fetchall()
+
+
+@database_common.connection_handler
+def search_high_score_data_by_board_seed(cursor: RealDictCursor, board_seed_id: int):
+    query = """
+            SELECT board_seed_id, elapsed_time, mistakes, users.username, difficulty
+            FROM scores
+            INNER JOIN users
+            ON scores.user_id=users.id
+            WHERE board_seed_id=%(board_seed_id)s
+            ORDER BY elapsed_time 
+            """
+    cursor.execute(query, {'board_seed_id': board_seed_id})
+    return cursor.fetchall()
+
+
+@database_common.connection_handler
+def get_high_score_data_by_difficulty(cursor: RealDictCursor, sel_diff_start: int, sel_diff_end: int) -> list:
+    query = """
+            SELECT * FROM (
+            SELECT board_seed_id, elapsed_time, mistakes, users.username, difficulty
+            FROM scores
+            INNER JOIN users
+            ON scores.user_id=users.id
+            WHERE difficulty >= %(sel_diff_start)s AND difficulty <= %(sel_diff_end)s
+            ORDER BY elapsed_time ) AS table_sorted_by_elapsed_time
+            ORDER BY table_sorted_by_elapsed_time.difficulty DESC
+            """
+    cursor.execute(query, {'sel_diff_start': sel_diff_start, 'sel_diff_end': sel_diff_end})
+    return cursor.fetchall()
+
+
+@database_common.connection_handler
 def save_game_to_database(cursor: RealDictCursor, save_id: int, u_id: int, board_seed_id: int, initial_board: str,
                           game_state: str, solved_board: str, pencil_markups: str, mistake_fields: str,
-                          elapsed_time: int, mistakes: int, hints: bool) -> int:
+                          elapsed_time: int, mistakes: int, hints: bool):
     query = """
             UPDATE saved_games 
             SET user_id = %(u_id)s, 

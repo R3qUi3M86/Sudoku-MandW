@@ -365,21 +365,8 @@ def get_shuffled(game_board, solved_game_board):
         if i == 1:
             i += 1
 
-        #print(looped_game_board)
-
         looped_game_board = np.rot90(looped_game_board, k=1+i).tolist()
         looped_solved_game_board = np.rot90(looped_solved_game_board, k=1+i).tolist()
-
-    # triple_row_boards = get_quadrants_list(game_board, solved_game_board)
-    # random.shuffle(triple_row_boards)
-    # game_board = get_board_from_triple_row_boards(triple_row_boards, GAME_BOARD)
-    # solved_game_board = get_board_from_triple_row_boards(triple_row_boards, SOLVED_GAME_BOARD)
-    #
-    # game_board = np.rot90(game_board, k=3)
-    # solved_game_board = np.rot90(solved_game_board, k=3)
-
-    # print(looped_game_board)
-    # print(looped_solved_game_board)
 
     return looped_game_board, looped_solved_game_board
 

@@ -13,6 +13,7 @@ app.permanent_session_lifetime = timedelta(days=5)
 
 DIFFICULTY_DICT = {'1': (30, 35), '2': (36, 45), '3': (46, 49), '4': (50, 53), '5': (54, 60)}
 DIFFICULTY_NAME_DICT = {'1': 'EASY', '2': 'MEDIUM', '3': 'HARD', '4': 'EXPERT', '5': 'EVIL'}
+DIFFICULTY_NAME_SCORES_DICT = {'1': 'select difficulty', '2': 'EASY', '3': 'MEDIUM', '4': 'HARD', '5': 'EXPERT', '6': 'EVIL'}
 
 
 @app.route("/")
@@ -134,7 +135,7 @@ def start_new_game():
                      'mistakes': 0,
                      'mistake_fields': [],
                      'pencil_markups': util.init_markup_matrix(),
-                     'hints': hints,
+                     'hints': request.form.get('hints'),
                      'ranked': request.form.get('ranked')}
 
         if not request.form.get('ranked'):
@@ -288,7 +289,7 @@ def update_game_state():
         session['game_data']['pencil_markups'] = pencil_markups
         session['game_data']['game_state'] = game_state
 
-        if not session['game_data']['ranked']:
+        if session['game_data']['hints']:
             return {'won': False,
                     'mistakes': session['game_data']['mistakes'],
                     'mistake_fields': eval(session['game_data']['mistake_fields'])}
@@ -301,10 +302,39 @@ def update_game_state():
 @app.route("/high_scores", methods=["GET"])
 def high_score():
     high_scores = data_manager.get_all_scores()
+
+    # search bar for username, board seed
+    order_by_username = request.args.get('username')
+    order_by_board_seed = request.args.get('board_seed')
+    difficulty_filter = request.args.get('difficulty')
+    selected_difficulty_filter = None
+    selected_search_by_label = None
+
+    # username search
+    if order_by_username:
+        high_scores = data_manager.search_high_score_data_by_username(order_by_username)
+
+    # board seed search
+    if order_by_board_seed and order_by_board_seed.isnumeric():
+        high_scores = data_manager.search_high_score_data_by_board_seed(order_by_board_seed)
+
+    # difficulty filter
+    if difficulty_filter:
+        if difficulty_filter == '1':
+            high_scores = data_manager.get_all_scores()
+        else:
+            diff_range = DIFFICULTY_DICT[str(int(difficulty_filter) - 1)]
+            selected_difficulty_filter = DIFFICULTY_NAME_SCORES_DICT[difficulty_filter]
+            high_scores = data_manager.get_high_score_data_by_difficulty(diff_range[0], diff_range[1])
+
+    # difficulty and time format for ux
     for score in high_scores:
         for key in DIFFICULTY_DICT:
             if score['difficulty'] in range(DIFFICULTY_DICT[key][0], DIFFICULTY_DICT[key][1] + 1):
-                score['difficulty'] = DIFFICULTY_NAME_DICT[key]
+                score['difficulty'] = DIFFICULTY_NAME_DICT[key] + f" ({81-score['difficulty']})"
         score['elapsed_time'] = util.format_time(score['elapsed_time'])
 
-    return render_template('high_scores.html', high_scores=high_scores)
+    return render_template('high_scores.html',
+                           high_scores=high_scores,
+                           selected_difficulty_filter=selected_difficulty_filter,
+                           selected_search_by_label=selected_search_by_label)

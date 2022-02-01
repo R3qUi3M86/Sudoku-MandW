@@ -8,14 +8,16 @@ body, html{
 table{
     text-align: center;
     justify-content: center;
-    width: 100%;
+    width: 68%;
 }
 
 td, th{
-    padding: 0.3rem;
+    padding: 0.5rem;
     border: 1px solid white;
-    min-width: 95px;
+    min-width: 109px;
 }
+
+td {}
 
 ol li{
     display: list-item;
@@ -67,9 +69,24 @@ ol li{
     text-align: center
 }
 
+.search-window-container{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.search-item{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin: 0 0 5px;
+    justify-content: center;
+}
+
 .action_title{
     font-size: 2.5rem;
-    padding: 1rem;
+    padding: 0;
     font-weight: bold;
     margin: 1rem;
 }
@@ -80,6 +97,13 @@ ol li{
     border-radius: 20px;
     padding: 2rem;
     max-width: 70%;
+}
+
+.search-window-border{
+    display: flex;
+    border: 3px solid rgb(7, 55, 97);
+    border-radius: 15px;
+    padding: 0.5rem 9rem;
 }
 
 .grid-container{
@@ -102,7 +126,7 @@ ol li{
     background-color: rgb(255, 255, 255);
     text-align: center;
     vertical-align: middle;
-    padding: 0px;
+    padding: 0;
 }
 
 .tile-border{
@@ -185,6 +209,16 @@ ol li{
     border-radius: 5px;
     background-color: rgb(138, 223, 255);
     width: 210px
+}
+
+.search-button{
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0.3rem;
+    border-color: rgb(7, 55, 97);
+    border-radius: 5px;
+    background-color: rgb(138, 223, 255);
+    width: 110px;
 }
 
 .menu-button:hover{
@@ -356,7 +390,7 @@ ol li{
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     border: 1px solid rgb(0, 0, 0);
-    padding: 0px
+    padding: 0
 }
 
 #sudoku-board{

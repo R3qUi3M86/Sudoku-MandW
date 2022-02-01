@@ -1,7 +1,8 @@
 let selected_tool = 0
 let selected_number = null
 let selected_field_index = null
-const timerInterval = setInterval(Timer, 1000)
+let found_numbers = {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0, '9': 0}
+const timerInterval = setInterval(Timer, 1000) //consider refactoring
 let elapsed_time = game_data['elapsed_time']
 
 
@@ -23,6 +24,7 @@ function selectPenListener(){
                 numberButton.id = 'hoverable-number-button';
             }
         }
+        deactivateFoundNumberButtons();
     }
 }
 
@@ -38,11 +40,12 @@ function selectPencilListener(){
                 numberButton.id = 'hoverable-number-button';
             }
         }
+        deactivateFoundNumberButtons();
     }
 }
 
 function selectEraserListener(){
-    if (selected_tool !== 2) {
+    if (selected_tool !== 2) { //const for tools
         selected_tool = 2;
         document.getElementsByClassName("pen-button")[0].id = 'deselected';
         document.getElementsByClassName("pencil-button")[0].id = 'deselected';
@@ -68,11 +71,11 @@ function selectNumberListener(evt) {
 
 
 function addKeyboardEventListeners(){
-    document.addEventListener('keydown', numberKeyListener)
+    document.addEventListener('keydown', keyboardKeyListener)
 }
 
 
-function numberKeyListener(event) {
+function keyboardKeyListener(event) {
     let functionKeys = [' ', 'z', 'x', 'c', 'Escape'];
     let arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
     if (arrowKeys.includes(event.key)) {
@@ -103,6 +106,7 @@ function numberKeyListener(event) {
             }
         }
     }
+    deactivateFoundNumberButtons();
 }
 
 function arrowNavigate(direction){
@@ -133,9 +137,11 @@ function arrowNavigate(direction){
 }
 
 function spaceBarAction(){
-    let tile = getFieldElementByRowCol(selected_field_index[0], selected_field_index[1]);
-    if (tile.id !== 'selected-initial-val-tile') {
-        eraseField(tile);
+    if (selected_field_index !== null) {
+        let tile = getFieldElementByRowCol(selected_field_index[0], selected_field_index[1]);
+        if (tile.id !== 'selected-initial-val-tile') {
+            eraseField(tile);
+        }
     }
 }
 
@@ -200,6 +206,7 @@ function numberButtonAction(number_button){
             }
         }
     }
+    deactivateFoundNumberButtons();
 }
 
 
@@ -242,12 +249,14 @@ function selectFieldEventListener(evt){
             deselectAllFields()
         }
     } else {
-        if (tile.firstElementChild.id !== 'initial-val-tile'){
+        if ((tile.firstElementChild.id !== 'initial-val-tile') && (tile.firstElementChild.id !== 'selected-initial-val-tile')){
             selected_field_index = [selected_row, selected_col]
             eraseField(tile.firstElementChild);
-            selected_field_index = null
+            deselectAllFields();
+            selected_field_index = null;
         }
     }
+    deactivateFoundNumberButtons();
 }
 
 function setFieldSelection(fieldNo){
@@ -403,15 +412,19 @@ function eraseField(tile){
     tile.innerHTML = ""
     let selected_row = tile.dataset.tilerow;
     let selected_col = tile.dataset.tilecol;
-    game_data['game_state'][parseInt(selected_row)][parseInt(selected_col)] = 0
-    game_data['pencil_markups'][selected_row][selected_col] = []
-    unmarkFieldMistake(tile)
-    requestUpdateGameState(selected_field_index)
+    game_data['game_state'][parseInt(selected_row)][parseInt(selected_col)] = 0;
+    game_data['pencil_markups'][selected_row][selected_col] = [];
+    unmarkFieldMistake(tile);
+    requestUpdateGameState(selected_field_index);
 }
 
 function unmarkFieldMistake(tile){
     if (((selected_number !== null) && (selected_tool === 1)) || (selected_tool === 2)){
-        tile.id = '';
+        if ((tile.id !== 'selected-tile') && (tile.id !== 'mistake-tile')) {
+            tile.id = '';
+        } else {
+            tile.id = 'selected-tile';
+        }
     } else {
         tile.id = 'selected-tile';
     }
@@ -435,15 +448,17 @@ function requestUpdateGameState(field_index) {
                 clearInterval(timerInterval);
                 let boardTitleElement = document.getElementsByClassName('board-title')[0];
                 boardTitleElement.id = 'solved-board-title';
-                boardTitleElement.innerHTML = 'SOLVED ' + boardTitleElement.innerHTML
-                document.getElementById('back-button').firstElementChild.setAttribute('href','/')
-                document.getElementById('back-button').firstElementChild.firstElementChild.innerHTML = 'BACK TO MENU'
+                boardTitleElement.innerHTML = 'SOLVED ' + boardTitleElement.innerHTML;
+                document.getElementById('back-button').firstElementChild.setAttribute('href','/');
+                document.getElementById('back-button').firstElementChild.firstElementChild.innerHTML = 'BACK TO MENU';
 
             } else {
-                document.getElementsByClassName('mistakes-counter')[0].innerHTML = json['mistakes']
-                game_data['mistake_fields'] = json['mistake_fields']
-                markMistake(field_index)
+                document.getElementsByClassName('mistakes-counter')[0].innerHTML = json['mistakes'];
+                game_data['mistake_fields'] = json['mistake_fields'];
+                markMistake(field_index);
             }
+            getFoundNumbers();
+            deactivateFoundNumberButtons();
         });
     })
 }
@@ -476,7 +491,7 @@ function Timer() {
         timeText += seconds.toString();
     }
 
-    document.getElementsByClassName('timer-counter')[0].innerHTML = timeText
+    document.getElementsByClassName('timer-counter')[0].innerHTML = timeText;
 }
 
 function populateMarkups(){
@@ -485,7 +500,7 @@ function populateMarkups(){
             for (let k = 0; k < game_data['pencil_markups'][i][j].length; k++){
                 let number = game_data['pencil_markups'][i][j][k];
                 let tile = getFieldElementByRowCol(i, j);
-                markFieldWithPencil(number, tile, false)
+                markFieldWithPencil(number, tile, false);
             }
         }
     }
@@ -509,7 +524,40 @@ function populateMistakes() {
     }
 }
 
+function getFoundNumbers(){
+    found_numbers = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
+    for (let x = 0; x < 9; x++){
+        for (let y = 0; y < 9; y++) {
+            if (game_data['game_state'][x][y] !== 0) {
+                let mistake = false;
+                for(let k = 0; k < game_data['mistake_fields'].length; k++){
+                    if(game_data['mistake_fields'][k][0] === x && game_data['mistake_fields'][k][1] === y){
+                        mistake = true;
+                    }
+                }
+                if (!mistake){
+                    found_numbers[(game_data['game_state'][x][y]).toString()] += 1;
+                }
+            }
+        }
+    }
+}
 
+function deactivateFoundNumberButtons() {
+    for (let p = 1; p < 10; p++) {
+        let numberButton = document.getElementsByClassName('number-button')[p - 1]
+        if (found_numbers[p] === 9) {
+            numberButton.id = 'inactive-number-button';
+            if (selected_number === p) {
+                selected_number = null;
+            }
+        } else {
+            if ((numberButton.id === 'inactive-number-button') && (selected_tool !== 2)) {
+                numberButton.id = 'hoverable-number-button';
+            }
+        }
+    }
+}
 
 addToolButtonsEventListeners();
 addNumberButtonsEventListeners();
@@ -518,3 +566,5 @@ addKeyboardEventListeners();
 Timer();
 populateMarkups();
 populateMistakes();
+getFoundNumbers();
+deactivateFoundNumberButtons();
